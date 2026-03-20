@@ -463,13 +463,30 @@ document.addEventListener('touchstart',function initAudio(){
   var a=new(window.AudioContext||window.webkitAudioContext)();
   a.resume().then(function(){audioCtx=a;});
 },{passive:true});
-document.getElementById('btn-st').addEventListener('click',startGame);
-document.getElementById('btn-l').addEventListener('click',function(){move(-1);});
-document.getElementById('btn-r').addEventListener('click',function(){move(1);});
 
-document.getElementById('btn-l').addEventListener('touchstart',function(e){e.preventDefault();move(-1);},{passive:false});
-document.getElementById('btn-r').addEventListener('touchstart',function(e){e.preventDefault();move(1);},{passive:false});
-document.getElementById('btn-st').addEventListener('touchstart',function(e){e.preventDefault();startGame();},{passive:false});
+var touched=false;
+function onBtnTouch(fn){
+  return function(e){
+    e.preventDefault();
+    touched=true;
+    fn();
+    setTimeout(function(){touched=false;},500);
+  };
+}
+function onBtnClick(fn){
+  return function(){
+    if(touched)return;
+    fn();
+  };
+}
+
+document.getElementById('btn-st').addEventListener('touchstart',onBtnTouch(startGame),{passive:false});
+document.getElementById('btn-l').addEventListener('touchstart',onBtnTouch(function(){move(-1);}),{passive:false});
+document.getElementById('btn-r').addEventListener('touchstart',onBtnTouch(function(){move(1);}),{passive:false});
+
+document.getElementById('btn-st').addEventListener('click',onBtnClick(startGame));
+document.getElementById('btn-l').addEventListener('click',onBtnClick(function(){move(-1);}));
+document.getElementById('btn-r').addEventListener('click',onBtnClick(function(){move(1);}));
 
 document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
 document.addEventListener('gesturestart',function(e){e.preventDefault();});
