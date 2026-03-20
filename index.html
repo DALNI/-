@@ -458,6 +458,11 @@ function startGame(){
   updateStartBtn();
 }
 
+document.addEventListener('touchstart',function initAudio(){
+  document.removeEventListener('touchstart',initAudio);
+  var a=new(window.AudioContext||window.webkitAudioContext)();
+  a.resume().then(function(){audioCtx=a;});
+},{passive:true});
 document.getElementById('btn-st').addEventListener('click',startGame);
 document.getElementById('btn-l').addEventListener('click',function(){move(-1);});
 document.getElementById('btn-r').addEventListener('click',function(){move(1);});
