@@ -483,9 +483,11 @@ function onBtnClick(fn){
 document.getElementById('btn-st').addEventListener('touchstart',function(e){
   e.preventDefault();
   touched=true;
-  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  var a=audioCtx;
-  a.resume().then(function(){startGame();}).catch(function(){startGame();});
+  if(!audioCtx){
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    audioCtx.resume();
+  }
+  startGame();
   setTimeout(function(){touched=false;},500);
 },{passive:false});
 document.getElementById('btn-l').addEventListener('touchstart',onBtnTouch(function(){move(-1);}),{passive:false});
