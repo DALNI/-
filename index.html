@@ -84,7 +84,7 @@ body {
 <div id="gw">
   <div id="hud">
     <span id="h-kaki">KAKI:00</span>
-    <canvas id="h-life-cv" width="86" height="13" style="image-rendering:pixelated;vertical-align:middle;width:86px;height:13px;"></canvas>
+    <canvas id="h-life-cv" width="68" height="13" style="image-rendering:pixelated;vertical-align:middle;width:68px;height:13px;"></canvas>
   </div>
   <canvas id="frame" width="220" height="200"></canvas>
   <div id="btns">
@@ -273,10 +273,10 @@ hudCtx.imageSmoothingEnabled=false;
 function drawLifeHUD(life){
   hudCtx.clearRect(0,0,hudCv.width,hudCv.height);
   for(var i=0;i<3;i++)
-    hudCtx.drawImage(i<life?SPR_HEART_FULL:SPR_HEART_EMPTY,i*29,3);
+    hudCtx.drawImage(i<life?SPR_HEART_FULL:SPR_HEART_EMPTY,i*22,3);
 }
 
-var kaniDir=0,particles=[];
+var kaniDir=0,squishedKakis=[];
 var BASE_SLOW=2000;
 function interval(kaki){
   var cyc=Math.floor(kaki/10),fast=cyc%2===1,lv=Math.floor(cyc/2);
@@ -288,13 +288,13 @@ function newState(){
          spawnCount:0,lastForkAt:-1};
 }
 
-function spawnParticles(col,row){
-  var px=col*CW+CW/2,py=row*CH+CH/2;
-  for(var i=0;i<7;i++){
-    var angle=Math.random()*Math.PI*2,speed=0.8+Math.random()*2.5;
-    particles.push({x:px,y:py,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-1,life:10+Math.floor(Math.random()*6),maxLife:16});
-  }
-}
+var SPR_KAKI_SQUISH=makeSpr([
+  [0,0,0,0,0,0,0,0,0],
+  [0,1,2,1,2,1,2,1,0],
+  [1,1,1,1,1,1,1,1,1],
+  [0,1,2,1,1,1,2,1,0],
+  [0,0,1,1,1,1,1,0,0],
+],9,5);
 
 function spawn(s){
   var col=Math.floor(Math.random()*COLS);
@@ -336,11 +336,13 @@ function tick(s){
       }
     }else{
       if(it.type===ITEMS.K){
-        sndMiss();spawnParticles(it.col,it.row);
+        sndMiss();squishedKakis.push({col:it.col,ticks:2});
         s.life--;if(s.life<=0){s.life=0;s.running=false;s.over=true;}
       }
     }
   }
+  squishedKakis=squishedKakis.filter(function(q){return q.ticks>0;});
+  for(var k=0;k<squishedKakis.length;k++)squishedKakis[k].ticks--;
   spawn(s);updateHUD(s);draw(s);
   if(s.running){clearTimeout(timer);timer=setTimeout(function(){tick(state);},interval(s.kaki));}
   else if(s.over)drawOver(s);
@@ -362,13 +364,12 @@ function draw(s){
   }
   var kspr=kaniDir>=0?SPR_KANI_R:SPR_KANI_L;
   cx.drawImage(kspr,s.kani*CW+Math.floor((CW-12)/2),(ROWS-1)*CH+Math.floor((CH-8)/2));
-  particles=particles.filter(function(p){return p.life>0;});
-  for(var j=0;j<particles.length;j++){
-    var p=particles[j];
-    cx.globalAlpha=p.life/p.maxLife;
-    cx.fillStyle=C_DK;
-    cx.fillRect(Math.round(p.x),Math.round(p.y),2,2);
-    p.x+=p.vx;p.y+=p.vy;p.vy+=0.25;p.life--;
+  squishedKakis=squishedKakis.filter(function(q){return q.ticks>0;});
+  for(var j=0;j<squishedKakis.length;j++){
+    var q=squishedKakis[j];
+    var qx=q.col*CW+Math.floor((CW-SPR_KAKI_SQUISH.width)/2);
+    var qy=(ROWS-1)*CH+Math.floor((CH-SPR_KAKI_SQUISH.height)/2);
+    cx.drawImage(SPR_KAKI_SQUISH,qx,qy);
   }
   cx.globalAlpha=1;
 }
@@ -425,7 +426,7 @@ function startGame(){
   if(!state||state.over){
     if(timer)clearTimeout(timer);
     try{getAC();}catch(e){}
-    particles=[];kaniDir=0;
+    squishedKakis=[];kaniDir=0;
     state=newState();state.running=true;
     sndStart();
     spawn(state);updateHUD(state);draw(state);
