@@ -483,8 +483,8 @@ function onBtnClick(fn){
 document.getElementById('btn-st').addEventListener('touchstart',function(e){
   e.preventDefault();
   touched=true;
-  var a=new(window.AudioContext||window.webkitAudioContext)();
-  audioCtx=a;
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  var a=audioCtx;
   a.resume().then(function(){startGame();}).catch(function(){startGame();});
   setTimeout(function(){touched=false;},500);
 },{passive:false});
