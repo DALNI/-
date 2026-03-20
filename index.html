@@ -489,7 +489,7 @@ function onBtnClick(fn){
   };
 }
 
-document.getElementById('btn-st').addEventListener('touchstart',function(e){
+document.getElementById('btn-st').addEventListener('touchend',function(e){
   e.preventDefault();
   touched=true;
   if(!state||state.over){
@@ -499,8 +499,8 @@ document.getElementById('btn-st').addEventListener('touchstart',function(e){
   }
   setTimeout(function(){touched=false;},500);
 },{passive:false});
-document.getElementById('btn-l').addEventListener('touchstart',onBtnTouch(function(){move(-1);}),{passive:false});
-document.getElementById('btn-r').addEventListener('touchstart',onBtnTouch(function(){move(1);}),{passive:false});
+document.getElementById('btn-l').addEventListener('touchend',function(e){e.preventDefault();touched=true;move(-1);setTimeout(function(){touched=false;},500);},{passive:false});
+document.getElementById('btn-r').addEventListener('touchend',function(e){e.preventDefault();touched=true;move(1);setTimeout(function(){touched=false;},500);},{passive:false});
 
 document.getElementById('btn-st').addEventListener('click',onBtnClick(startGame));
 document.getElementById('btn-l').addEventListener('click',onBtnClick(function(){move(-1);}));
