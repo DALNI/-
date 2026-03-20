@@ -467,44 +467,20 @@ function startGame(){
   updateStartBtn();
 }
 
-document.addEventListener('touchstart',function initAudio(){
-  document.removeEventListener('touchstart',initAudio);
-  var a=new(window.AudioContext||window.webkitAudioContext)();
-  a.resume().then(function(){audioCtx=a;});
-},{passive:true});
-
-var touched=false;
-function onBtnTouch(fn){
-  return function(e){
-    e.preventDefault();
-    touched=true;
-    fn();
-    setTimeout(function(){touched=false;},500);
-  };
-}
-function onBtnClick(fn){
-  return function(){
-    if(touched)return;
-    fn();
-  };
-}
-
 document.getElementById('btn-st').addEventListener('touchend',function(e){
   e.preventDefault();
-  touched=true;
   if(!state||state.over){
     initAudioAndStart();
   } else {
     startGame();
   }
-  setTimeout(function(){touched=false;},500);
 },{passive:false});
-document.getElementById('btn-l').addEventListener('touchend',function(e){e.preventDefault();touched=true;move(-1);setTimeout(function(){touched=false;},500);},{passive:false});
-document.getElementById('btn-r').addEventListener('touchend',function(e){e.preventDefault();touched=true;move(1);setTimeout(function(){touched=false;},500);},{passive:false});
+document.getElementById('btn-l').addEventListener('touchend',function(e){e.preventDefault();move(-1);},{passive:false});
+document.getElementById('btn-r').addEventListener('touchend',function(e){e.preventDefault();move(1);},{passive:false});
 
-document.getElementById('btn-st').addEventListener('click',onBtnClick(startGame));
-document.getElementById('btn-l').addEventListener('click',onBtnClick(function(){move(-1);}));
-document.getElementById('btn-r').addEventListener('click',onBtnClick(function(){move(1);}));
+document.getElementById('btn-st').addEventListener('click',startGame);
+document.getElementById('btn-l').addEventListener('click',function(){move(-1);});
+document.getElementById('btn-r').addEventListener('click',function(){move(1);});
 
 document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
 document.addEventListener('gesturestart',function(e){e.preventDefault();});
