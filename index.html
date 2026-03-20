@@ -117,7 +117,17 @@ function beep(freq,type,dur,vol,slide){
   }catch(e){}
 }
 function sndMove(){beep(1400,'square',0.05,0.06,900);}
-function sndKaki(){beep(1800,'sine',0.08,0.16,2200);}
+function sndKaki(){
+  try{
+    var a=getAC(),o=a.createOscillator(),g=a.createGain();
+    o.connect(g);g.connect(a.destination);o.type='triangle';
+    o.frequency.setValueAtTime(1000,a.currentTime);
+    o.frequency.exponentialRampToValueAtTime(2400,a.currentTime+0.13);
+    g.gain.setValueAtTime(0.2,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.13);
+    o.start(a.currentTime);o.stop(a.currentTime+0.13);
+  }catch(e){}
+}
 function sndFork(){beep(280,'sawtooth',0.15,0.18,110);}
 function sndDrop(){
   [0,0.1,0.2].forEach(function(t,i){
