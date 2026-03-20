@@ -38,12 +38,18 @@ body {
 #hud {
   display: flex;
   margin-bottom: 4px;
-  background: #222;
-  padding: 4px 8px;
-  border-radius: 2px;
   width: 212px;
   justify-content: space-between;
   align-items: center;
+}
+#hud-kaki {
+  display: flex;
+  align-items: center;
+}
+#hud-life {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 #hud span {
   font-family: 'Courier New', monospace;
@@ -83,8 +89,8 @@ body {
 <body>
 <div id="gw">
   <div id="hud">
-    <span id="h-kaki">KAKI:00</span>
-    <canvas id="h-life-cv" width="68" height="13" style="image-rendering:pixelated;vertical-align:middle;width:68px;height:13px;"></canvas>
+    <div id="hud-kaki"><canvas id="h-kaki-cv" width="52" height="13" style="image-rendering:pixelated;vertical-align:middle;width:52px;height:13px;"></canvas></div>
+    <div id="hud-life"><canvas id="h-life-cv" width="68" height="13" style="image-rendering:pixelated;vertical-align:middle;width:68px;height:13px;"></canvas></div>
   </div>
   <canvas id="frame" width="220" height="200"></canvas>
   <div id="btns">
@@ -244,6 +250,16 @@ var SPR_KAKI=makeSpr([
   [0,1,1,1,1,1,0],
   [0,0,1,1,1,0,0],
 ],7,8);
+var SPR_KAKI_HUD=makeSpr([
+  [0,0,0,1,0,0,0],
+  [0,0,0,1,1,0,0],
+  [0,1,1,1,1,1,0],
+  [1,1,1,1,1,1,1],
+  [1,1,1,1,1,1,1],
+  [1,1,2,1,2,1,1],
+  [0,1,1,1,1,1,0],
+  [0,0,1,1,1,0,0],
+],7,8);
 var SPR_FORK=makeSpr([
   [0,0,0,1,0,0,0],
   [0,0,0,1,0,0,0],
@@ -289,7 +305,21 @@ hudCtx.imageSmoothingEnabled=false;
 function drawLifeHUD(life){
   hudCtx.clearRect(0,0,hudCv.width,hudCv.height);
   for(var i=0;i<3;i++)
-    hudCtx.drawImage(i<life?SPR_HEART_FULL:SPR_HEART_EMPTY,i*22,3);
+    hudCtx.drawImage(i<life?SPR_HEART_FULL:SPR_HEART_EMPTY,i*18+20,3);
+}
+
+var kakiCv=document.getElementById('h-kaki-cv');
+var kakiCtx=kakiCv.getContext('2d');
+kakiCtx.imageSmoothingEnabled=false;
+function drawKakiHUD(count){
+  kakiCtx.clearRect(0,0,kakiCv.width,kakiCv.height);
+  kakiCtx.drawImage(SPR_KAKI_HUD,0,3);
+  kakiCtx.fillStyle=C_DK;
+  kakiCtx.font='bold 12px "Courier New"';
+  kakiCtx.textAlign='left';
+  kakiCtx.textBaseline='middle';
+  kakiCtx.fillText('\u00d7',11,7);
+  kakiCtx.fillText(String(count).padStart(2,'0'),22,7);
 }
 
 var kaniDir=0,squishedKakis=[];
@@ -365,7 +395,7 @@ function tick(s){
 }
 
 function updateHUD(s){
-  document.getElementById('h-kaki').textContent='KAKI:'+String(s.kaki).padStart(2,'0');
+  drawKakiHUD(s.kaki);
   drawLifeHUD(s.life);
 }
 
@@ -412,11 +442,24 @@ function drawTitle(){
   cx.fillText('KANI KANI',cv.width/2,36);
   cx.fillText('CATCH',cv.width/2,54);
   cx.drawImage(SPR_KANI_R,cv.width/2-6,68);
+  cx.font='bold 9px "Courier New"';cx.textAlign='left';
   cx.font='bold 9px "Courier New"';
-  cx.fillText('[KAKI] CATCH!',cv.width/2,100);
-  cx.fillText('[FORK] DANGER!',cv.width/2,114);
-  cx.fillText('[DROP] RECOVER!',cv.width/2,128);
-  cx.font='bold 11px "Courier New"';
+  var items=[
+    {spr:SPR_KAKI, txt:'CATCH!'},
+    {spr:SPR_FORK, txt:'DANGER!'},
+    {spr:SPR_DROP, txt:'RECOVER!'},
+  ];
+  items.forEach(function(item,i){
+    var tw=cx.measureText(item.txt).width;
+    var gap=4;
+    var totalW=item.spr.width+gap+tw;
+    var startX=cv.width/2-totalW/2;
+    var y=96+i*16;
+    cx.drawImage(item.spr,startX,y-item.spr.height/2);
+    cx.textAlign='left';cx.textBaseline='middle';
+    cx.fillText(item.txt,startX+item.spr.width+gap,y);
+  });
+  cx.font='bold 11px "Courier New"';cx.textAlign='center';
   cx.fillText('> TAP TO START <',cv.width/2,155);
 }
 
@@ -501,6 +544,7 @@ cv.addEventListener('touchend',function(e){
   if(Math.abs(dx)>8)move(dx<0?-1:1);
 },{passive:true});
 
+drawKakiHUD(0);
 drawLifeHUD(3);
 drawTitle();
 </script>
